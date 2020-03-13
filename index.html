@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+    </style>
+  </head>
+  <body>
+    <div>
+      <input id="id" type="text" /><button id="connect">Connect</button>
+    </div>
+    <div>
+      <ul id="messages"></ul>
+      <form action="">
+        <input id="m" autocomplete="off" /><button>Send</button>
+      </form>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+    jQuery(function () {
+      if(window.location.protocol=="https:")
+      {
+        var URL_SERVER = 'https://domain.xyz:488/'; 
+      }else{
+        var URL_SERVER = 'http://domain.xyz:488/'; 
+      }               
+        var socket = io(URL_SERVER,{"path":"","transports":["websocket"]});        
+
+        socket.on('connect', function() {
+          if (socket) {
+            console.log("Connected.");            
+          }else{
+            console.log("Not Connected.");
+          }
+        });
+
+        $('#connect').click(function(){
+          var id = $('#id').val();
+          console.log("id.", id); 
+          socket.emit('subscribe', id);
+        })
+          
+
+        $('form').submit(function(e){
+            e.preventDefault(); // prevents page reloading
+            console.log("sent message: ", $('#m').val());
+            socket.emit('message', $('#m').val());
+            $('#m').val('');
+            return false;
+        });
+        
+        socket.on('disconnect', function(){
+          console.log('user disconnected');
+        });
+
+        socket.on('message', function(msg){
+            console.log("income message: ", msg);
+            $('#messages').append($('<li>').text(msg));
+        });
+    });
+    </script>
+
+  </body>
+</html>
